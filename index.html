@@ -1,0 +1,253 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pizza Canvas Builder</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(-45deg, #0202B0, #121212, #0202B0, #121212);
+      background-size: 400% 400%;
+      animation: gradientBG 12s ease infinite;
+      color: #fff;
+      text-align: center;
+    }
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+    .container {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+    .container.active {
+      display: flex;
+    }
+    h1, h2 {
+      font-size: 2.5em;
+      color: #F3B83B;
+      animation: popIn 1s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .intro {
+      font-size: 1.2em;
+      margin: 20px auto 10px;
+    }
+    input[type="text"], textarea {
+      padding: 10px;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+      text-align: center;
+    }
+    textarea {
+      width: 90%;
+      height: 150px;
+      font-size: 1.1em;
+      border-radius: 12px;
+      padding: 15px;
+    }
+    .start-button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background-color: #F3B83B;
+      color: black;
+      font-weight: bold;
+      font-size: 1em;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    .pizza-question {
+      background-color: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      margin: 20px 0;
+      border-radius: 15px;
+      max-width: 700px;
+      width: 100%;
+    }
+    .pizza-layer-icons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 30px;
+    }
+    .pizza-layer-icons img {
+      width: 80px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .pizza-layer-icons img:hover {
+      transform: scale(1.1);
+    }
+    .layer-detail {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 600px;
+      margin-top: 30px;
+    }
+    .note-text {
+      color: #F3B83B;
+      margin-top: 30px;
+      font-size: 1em;
+    }
+    .credits {
+      margin-top: 40px;
+      font-size: 0.95em;
+    }
+    .credits span {
+      color: #F3B83B;
+      margin: 0 10px;
+    }
+    #tip-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 0.95em;
+      max-width: 250px;
+      z-index: 1000;
+      cursor: pointer;
+    }
+    #tip-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #001a4d;
+      border: 4px solid #F3B83B;
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      z-index: 2000;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="startScreen" class="container active">
+    <h1>Let’s cook up your business!</h1>
+    <p class="intro">Enter your team name:</p>
+    <input type="text" id="teamInput" placeholder="Team Name" />
+    <button class="start-button" onclick="goToIntro()">Start Cooking Your Business 🍕</button>
+    <div class="credits">
+      <span>Created by</span> Khadija Basahel <span>|</span>
+      <img src="beyond-logo.png" alt="Beyond Logo" style="height: 20px; vertical-align: middle;">
+    </div>
+  </div>
+
+  <div id="introScreen" class="container">
+    <h2>Build Your Business, One Layer at a Time</h2>
+    <div id="layerDisplay"></div>
+    <div class="pizza-layer-icons">
+      <img src="Crust.png" onclick="showLayer('crust')">
+      <img src="Sauce.png" onclick="showLayer('sauce')">
+      <img src="Cheese.png" onclick="showLayer('cheese')">
+      <img src="Toppings.png" onclick="showLayer('toppings')">
+      <img src="Crust Edge.png" onclick="showLayer('edge')">
+    </div>
+    <div class="note-text">Click on any pizza layer to explore what it represents in a startup.</div>
+    <button class="start-button" onclick="goToActivity()">Go to Activity</button>
+    <div class="credits">
+      <span>Created by</span> Khadija Basahel <span>|</span>
+      <img src="beyond-logo.png" alt="Beyond Logo" style="height: 20px; vertical-align: middle;">
+    </div>
+  </div>
+
+  <div id="activityScreen" class="container"></div>
+
+  <div id="tip-box" onclick="openTipPopup()">💡 Tip</div>
+  <div id="tip-popup">
+    <p id="popup-tip"></p>
+    <div class="popup-buttons">
+      <button onclick="nextTip()">Next</button>
+      <button onclick="closeTipPopup()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    const tips = [
+      "Start small, think big.",
+      "Build with users.",
+      "Celebrate small wins.",
+      "Solve real problems.",
+      "Progress beats perfection."
+    ];
+    let tipIndex = Math.floor(Math.random() * tips.length);
+
+    function openTipPopup() {
+      document.getElementById("popup-tip").innerText = tips[tipIndex];
+      document.getElementById("tip-popup").style.display = 'block';
+    }
+    function nextTip() {
+      tipIndex = (tipIndex + 1) % tips.length;
+      document.getElementById("popup-tip").innerText = tips[tipIndex];
+    }
+    function closeTipPopup() {
+      document.getElementById("tip-popup").style.display = 'none';
+    }
+    function goToIntro() {
+      document.getElementById("startScreen").classList.remove("active");
+      document.getElementById("introScreen").classList.add("active");
+    }
+    function goToActivity() {
+      document.getElementById("introScreen").classList.remove("active");
+      document.getElementById("activityScreen").classList.add("active");
+    }
+    function showLayer(layerId) {
+      const data = {
+        crust: ["Crust.png", "<strong>Crust (Mission):</strong> Defines your startup's purpose."],
+        sauce: ["Sauce.png", "<strong>Sauce (Values):</strong> Your guiding principles."],
+        cheese: ["Cheese.png", "<strong>Cheese (Culture):</strong> Internal team vibe."],
+        toppings: ["Toppings.png", "<strong>Toppings (Products):</strong> What you offer."],
+        edge: ["Crust Edge.png", "<strong>Crust Edge (Boundaries):</strong> What you won't do."]
+      };
+      const [imgSrc, textHTML] = data[layerId];
+      document.getElementById("layerDisplay").innerHTML = `<div class='layer-detail'><img src='${imgSrc}'><p>${textHTML}</p></div>`;
+    }
+    
+    function loadQuestions() {
+      const questions = [
+        { image: 'Crust.png', title: 'Crust (Mission)', text: 'What is the core purpose of your business?' },
+        { image: 'Sauce.png', title: 'Sauce (Values)', text: 'What values guide your decisions and behavior?' },
+        { image: 'Cheese.png', title: 'Cheese (Culture)', text: 'What is the internal vibe and culture of your team?' },
+        { image: 'Toppings.png', title: 'Toppings (Products/Services)', text: 'What unique offerings or services do you provide?' },
+        { image: 'Crust Edge.png', title: 'Crust Edge (Boundaries)', text: 'What won’t your business do or support?' }
+      ];
+      const container = document.getElementById("questions");
+      container.innerHTML = '';
+      questions.forEach(q => {
+        const el = document.createElement("div");
+        el.className = "pizza-question";
+        el.innerHTML = `
+          <img src="${q.image}" width="80"><br>
+          <h2 style="color:#F3B83B">${q.title}</h2>
+          <p>${q.text}</p>
+          <textarea placeholder="Write your answer here..."></textarea>
+          <div style="margin-top:10px">
+            <button class="start-button" onclick="toggleEdit(this, false)">Done</button>
+            <button class="start-button" onclick="toggleEdit(this, true)">Edit</button>
+          </div>
+        `;
+        container.appendChild(el);
+      });
+    }
+  </script>
+</body>
+</html>

@@ -173,6 +173,51 @@
       color: #F3B83B;
       margin: 10px 0 0;
     }
+
+    /* Tip Styles */
+    #tip-box {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      padding: 10px 15px;
+      border-radius: 10px;
+      font-size: 0.95em;
+      cursor: pointer;
+      z-index: 1000;
+    }
+
+    #tip-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #001a4d;
+      border: 4px solid #F3B83B;
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      z-index: 2000;
+      display: none;
+    }
+
+    .popup-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .popup-buttons button {
+      padding: 10px 20px;
+      background-color: #F3B83B;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -260,18 +305,30 @@
     </footer>
   </div>
 
+  <!-- Tip Button & Popup -->
+  <div id="tip-box" onclick="openTipPopup()">💡 Tip</div>
+  <div id="tip-popup">
+    <p id="popup-tip"></p>
+    <div class="popup-buttons">
+      <button onclick="nextTip()">Next</button>
+      <button onclick="closeTipPopup()">OK</button>
+    </div>
+  </div>
+
   <script>
     function goToIntro() {
       document.getElementById('startScreen').style.display = 'none';
       document.getElementById('introScreen').style.display = 'flex';
       document.getElementById('mainContent').style.display = 'none';
     }
+
     function goToMainContent() {
       const name = document.getElementById('teamInput').value;
       document.getElementById('team-name').textContent = name ? name : '';
       document.getElementById('introScreen').style.display = 'none';
       document.getElementById('mainContent').style.display = 'block';
     }
+
     function showLayer(layerId) {
       const data = {
         crust: ["Crust.png", "<span>Crust (Mission):</span> Just like the crust holds everything together, the mission defines the core purpose of the business why it exists."],
@@ -287,6 +344,31 @@
           <p>${textHTML}</p>
         </div>
       `;
+    }
+
+    // Tip Logic
+    const tips = [
+      "Start small, think big.",
+      "Solve a real problem, not a convenient one.",
+      "Feedback is gold — listen closely.",
+      "Launch fast, improve faster.",
+      "Know your ‘why’."
+    ];
+
+    let tipIndex = Math.floor(Math.random() * tips.length);
+
+    function openTipPopup() {
+      document.getElementById("popup-tip").innerText = tips[tipIndex];
+      document.getElementById("tip-popup").style.display = 'block';
+    }
+
+    function nextTip() {
+      tipIndex = (tipIndex + 1) % tips.length;
+      document.getElementById("popup-tip").innerText = tips[tipIndex];
+    }
+
+    function closeTipPopup() {
+      document.getElementById("tip-popup").style.display = 'none';
     }
   </script>
 </body>
